@@ -76,7 +76,7 @@ export async function fetchCMEData(): Promise<Record[]> {
   if (!res.ok) throw new Error("Falha ao buscar planilha");
   const text = await res.text();
 
-  const parsed = Papa.parse<Record<string, string>>(text, {
+  const parsed = Papa.parse<{ [k: string]: string }>(text, {
     header: true,
     skipEmptyLines: true,
   });
