@@ -40,7 +40,7 @@ export default defineConfig(({ mode }) => {
         },
         server: {
           entry: "server",
-          preset: process.env.VERCEL ? "vercel" : undefined,
+          preset: "vercel",
         },
       }),
       react(),
