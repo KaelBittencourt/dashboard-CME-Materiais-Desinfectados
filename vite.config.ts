@@ -38,7 +38,10 @@ export default defineConfig(({ mode }) => {
             specifiers: ["server-only"],
           },
         },
-        server: { entry: "server" },
+        server: {
+          entry: "server",
+          preset: process.env.VERCEL ? "vercel-server" : undefined,
+        },
       }),
       react(),
     ],
