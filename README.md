@@ -102,6 +102,27 @@ Certifique-se de possuir o [Node.js](https://nodejs.org/) (versão 18+) ou o [Bu
 
 ---
 
+## ☁️ Hospedagem e Deploy na Vercel
+
+Este projeto foi desenvolvido com suporte nativo a deploys na **Vercel** usando as capacidades de auto-detecção do **Nitro** e do **TanStack Start**.
+
+### Como publicar na Vercel:
+
+1. **Repositório**: Certifique-se de que o projeto foi enviado para o seu repositório no GitHub (já concluído).
+2. **Importação**: 
+   - Vá para o painel da [Vercel](https://vercel.com/) e clique em **Add New > Project**.
+   - Importe o repositório `dashboard-CME-Materiais-Desinfectados`.
+3. **Configuração do Projeto**:
+   - A Vercel detectará automaticamente o framework (TanStack Start / Nitro).
+   - O comando de Build padrão configurado deve ser `vite build` (ou `npm run build`), e o diretório de saída deve ser deixado em branco (o Nitro gerará automaticamente na pasta `.vercel/output`).
+4. **Variáveis de Ambiente**:
+   - Não há necessidade de configurar variáveis de ambiente adicionais, pois a conexão com o banco de dados/planilha é pública e estática, mas se futuramente você adicionar APIs protegidas, configure-as na aba **Environment Variables** da Vercel.
+5. **Deploy**:
+   - Clique em **Deploy**. O build executará e a Vercel criará automaticamente uma Serverless Function para rodar o servidor SSR e servirá os recursos estáticos de forma otimizada.
+
+---
+
 ## 📄 Licença
 
 Este projeto é de uso interno e acadêmico/institucional. Consulte os termos para fins de distribuição e uso.
+
