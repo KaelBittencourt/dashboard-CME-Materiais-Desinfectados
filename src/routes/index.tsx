@@ -2,21 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, queryOptions } from "@tanstack/react-query";
 import { useMemo, useState, useEffect } from "react";
 import { toast, Toaster } from "sonner";
-import { RefreshCw, Moon, Sun, Activity, FileSpreadsheet, FileText, FileDown } from "lucide-react";
+import { RefreshCw, Moon, Sun, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import { fetchCMEData, applyFilters, uniqueSorted, SECTORS, MONTH_NAMES_PT, type Filters } from "@/lib/cme-data";
-import { exportCSV, exportExcel, exportPDF } from "@/lib/cme-export";
 import { MultiSelect } from "@/components/cme/MultiSelect";
 import { KPIs } from "@/components/cme/KPIs";
 import {
   MonthlyEvolution, MaterialProduction, SectorParticipation,
-  Top10Materials, HeatmapMatrix, YearlyEvolution, SectorComparison,
+  Top10Materials, HeatmapMatrix, QuarterlyEvolution, SectorComparison,
 } from "@/components/cme/Charts";
 import { MaterialsTable, MovementsTable } from "@/components/cme/Tables";
 import { Insights } from "@/components/cme/Insights";
@@ -30,7 +26,7 @@ const cmeQuery = queryOptions({
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CME · Dashboard Analítico de Materiais Desinfectados" },
+      { title: "CME | Materiais Desinfectados | Analytics" },
       { name: "description", content: "Monitoramento executivo dos materiais desinfectados pelo Centro de Material e Esterilização." },
     ],
   }),
@@ -41,7 +37,7 @@ function useDarkMode() {
   const [dark, setDark] = useState(false);
   useEffect(() => {
     const stored = localStorage.getItem("cme-theme");
-    const isDark = stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const isDark = stored ? stored === "dark" : false;
     setDark(isDark);
     document.documentElement.classList.toggle("dark", isDark);
   }, []);
@@ -87,50 +83,31 @@ function Dashboard() {
 
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-background/80 border-b border-border/60">
-        <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between gap-4">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-chart-2 flex items-center justify-center shadow-md">
-              <Activity className="h-5 w-5 text-primary-foreground" />
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-primary to-chart-2 flex items-center justify-center shadow-md">
+              <Activity className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-lg font-bold leading-tight">CME Analytics</h1>
-              <p className="text-xs text-muted-foreground">Central de Material e Esterilização</p>
+              <h1 className="text-sm sm:text-base md:text-lg font-bold leading-tight">CME | Materiais Desinfectados | Analytics</h1>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Análise de Materiais Desinfectados</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={!filtered.length}>
-                  <FileDown className="h-4 w-4 mr-2" /> Exportar
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => exportExcel(filtered)}>
-                  <FileSpreadsheet className="h-4 w-4 mr-2" /> Excel (.xlsx)
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportCSV(filtered)}>
-                  <FileText className="h-4 w-4 mr-2" /> CSV
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportPDF(filtered)}>
-                  <FileText className="h-4 w-4 mr-2" /> PDF
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
+          <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end sm:justify-start">
             <Button variant="outline" size="sm" onClick={toggle} aria-label="Alternar tema">
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
 
             <Button onClick={handleRefresh} disabled={isFetching} size="sm" className="gap-2">
               <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-              Atualizar Dados
+              <span className="hidden sm:inline">Atualizar Dados</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-[1600px] mx-auto px-6 py-6 space-y-6">
+      <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Filters */}
         <Card className="shadow-sm">
           <CardContent className="p-4">
@@ -148,11 +125,11 @@ function Dashboard() {
                 selected={filters.sectors}
                 onChange={(v) => setFilters((f) => ({ ...f, sectors: v as any }))} />
               {activeFiltersCount > 0 && (
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="w-full sm:w-auto">
                   Limpar filtros <Badge variant="secondary" className="ml-2">{activeFiltersCount}</Badge>
                 </Button>
               )}
-              <div className="ml-auto text-xs text-muted-foreground">
+              <div className="w-full sm:w-auto sm:ml-auto text-xs text-muted-foreground text-left sm:text-right pt-2 sm:pt-0">
                 {isFetching && !isLoading && <span className="inline-flex items-center gap-1"><RefreshCw className="h-3 w-3 animate-spin" /> Sincronizando...</span>}
                 {!isFetching && data.length > 0 && (
                   <span>{filtered.length.toLocaleString("pt-BR")} de {data.length.toLocaleString("pt-BR")} registros</span>
@@ -188,7 +165,7 @@ function Dashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Top10Materials data={filtered} />
-              <YearlyEvolution data={filtered} />
+              <QuarterlyEvolution data={filtered} />
             </div>
 
             <SectorComparison data={filtered} />
@@ -201,7 +178,7 @@ function Dashboard() {
         )}
 
         <footer className="text-center text-xs text-muted-foreground py-6">
-          CME Analytics · Dados em tempo real do Google Sheets
+          CME | Materiais Desinfectados | Analytics · Dados em tempo real do Google Sheets
         </footer>
       </main>
     </div>

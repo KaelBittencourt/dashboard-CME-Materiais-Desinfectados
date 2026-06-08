@@ -45,14 +45,24 @@ const WEEKDAY_NAMES = [
 function parseDate(s: string): Date | null {
   if (!s) return null;
   const t = s.trim();
-  // dd/mm/yyyy
-  const m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  // dd/mm/yyyy (suporta anos de 2 a 4 dígitos, como 26 ou 0026)
+  const m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
   if (m) {
-    const d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+    let year = Number(m[3]);
+    if (year < 100) {
+      year += 2000;
+    }
+    const d = new Date(year, Number(m[2]) - 1, Number(m[1]));
     return isNaN(d.getTime()) ? null : d;
   }
   const d = new Date(t);
-  return isNaN(d.getTime()) ? null : d;
+  if (!isNaN(d.getTime())) {
+    if (d.getFullYear() < 100) {
+      d.setFullYear(d.getFullYear() + 2000);
+    }
+    return d;
+  }
+  return null;
 }
 
 function parseNum(s: string | undefined): number {

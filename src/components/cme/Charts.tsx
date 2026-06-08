@@ -41,14 +41,19 @@ export function MonthlyEvolution({ data }: Props) {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={280}>
-          <LineChart data={chart}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="label" stroke="var(--muted-foreground)" fontSize={12} />
-            <YAxis stroke="var(--muted-foreground)" fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
-            <Line type="monotone" dataKey="value" stroke="var(--chart-1)" strokeWidth={3}
+          <AreaChart data={chart} margin={{ top: 15, right: 15, left: 10, bottom: 5 }}>
+            <defs>
+              <linearGradient id="gAreaMonth" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.0} />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="label" stroke="var(--muted-foreground)" fontSize={11} axisLine={false} tickLine={false} dy={5} />
+            <YAxis stroke="var(--muted-foreground)" fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => v.toLocaleString("pt-BR")} dx={-5} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [v.toLocaleString("pt-BR"), "Quantidade"]} />
+            <Area type="monotone" dataKey="value" stroke="var(--chart-1)" strokeWidth={3} fill="url(#gAreaMonth)"
               dot={{ r: 4, fill: "var(--chart-1)" }} activeDot={{ r: 6 }} />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
@@ -127,15 +132,13 @@ export function Top10Materials({ data }: Props) {
     <Card className="shadow-sm">
       <CardHeader><CardTitle className="text-base">Top 10 Materiais</CardTitle></CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chart} margin={{ bottom: 60 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="material" stroke="var(--muted-foreground)" fontSize={11}
-              angle={-35} textAnchor="end" interval={0} height={70} />
-            <YAxis stroke="var(--muted-foreground)" fontSize={12} />
+        <ResponsiveContainer width="100%" height={320}>
+          <BarChart data={chart} layout="vertical" margin={{ left: 10, right: 35, top: 10, bottom: 10 }}>
+            <XAxis type="number" hide={true} />
+            <YAxis type="category" dataKey="material" stroke="var(--muted-foreground)" fontSize={11} width={100} axisLine={false} tickLine={false} />
             <Tooltip contentStyle={tooltipStyle} />
-            <Bar dataKey="value" fill="var(--chart-2)" radius={[6, 6, 0, 0]}>
-              <LabelList dataKey="value" position="top" style={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
+            <Bar dataKey="value" fill="var(--chart-2)" radius={[0, 4, 4, 0]} barSize={16}>
+              <LabelList dataKey="value" position="right" formatter={(v: number) => v.toLocaleString("pt-BR")} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -206,36 +209,72 @@ export function HeatmapMatrix({ data }: Props) {
   );
 }
 
-export function YearlyEvolution({ data }: Props) {
+export function QuarterlyEvolution({ data }: Props) {
   const chart = useMemo(() => {
-    const m = new Map<number, number>();
-    data.forEach((r) => m.set(r.year, (m.get(r.year) || 0) + r.total));
-    return [...m.entries()].sort(([a], [b]) => a - b).map(([k, v]) => ({ year: String(k), value: v }));
+    const m = new Map<string, number>();
+    data.forEach((r) => {
+      const key = `${r.year}-Q${r.quarter}`;
+      m.set(key, (m.get(key) || 0) + r.total);
+    });
+
+    return [...m.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => {
+        const [year, q] = k.split("-Q");
+        return { year: `${q}T/${year.slice(2)}`, value: v };
+      });
   }, [data]);
 
   return (
     <Card className="shadow-sm">
-      <CardHeader><CardTitle className="text-base">Evolução Anual</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-base">Evolução Trimestral</CardTitle></CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={260}>
-          <AreaChart data={chart}>
+          <AreaChart data={chart} margin={{ top: 20, right: 25, left: 25, bottom: 5 }}>
             <defs>
               <linearGradient id="gArea" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.7} />
-                <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.05} />
+                <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="year" stroke="var(--muted-foreground)" fontSize={12} />
-            <YAxis stroke="var(--muted-foreground)" fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
-            <Area type="monotone" dataKey="value" stroke="var(--chart-1)" strokeWidth={2} fill="url(#gArea)" />
+            <XAxis dataKey="year" stroke="var(--muted-foreground)" fontSize={11} axisLine={false} tickLine={false} dy={5} />
+            <YAxis hide={true} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [v.toLocaleString("pt-BR"), "Quantidade"]} />
+            <Area type="monotone" dataKey="value" stroke="var(--chart-1)" strokeWidth={2.5} fill="url(#gArea)">
+              <LabelList dataKey="value" position="top" offset={10} formatter={(v: number) => v.toLocaleString("pt-BR")} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 600 }} />
+            </Area>
           </AreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
   );
 }
+
+const SectorTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-popover border border-border p-3 rounded-lg shadow-md text-xs space-y-1.5 min-w-[150px]">
+        <p className="font-semibold text-foreground border-b border-border/50 pb-1 mb-1">{label}</p>
+        {[...payload].reverse().map((item: any, index: number) => {
+          const sectorIndex = SECTORS.indexOf(item.name as any);
+          const color = sectorIndex !== -1 ? COLORS[sectorIndex] : item.color;
+          return (
+            <div key={index} className="flex items-center justify-between gap-4 font-medium" style={{ color }}>
+              <span className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
+                {item.name}
+              </span>
+              <span className="font-bold text-foreground">
+                {Number(item.value).toLocaleString("pt-BR")}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+  return null;
+};
 
 export function SectorComparison({ data }: Props) {
   const chart = useMemo(() => {
@@ -255,15 +294,32 @@ export function SectorComparison({ data }: Props) {
     <Card className="shadow-sm">
       <CardHeader><CardTitle className="text-base">Comparativo de Setores</CardTitle></CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chart}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="label" stroke="var(--muted-foreground)" fontSize={12} />
-            <YAxis stroke="var(--muted-foreground)" fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
+        <ResponsiveContainer width="100%" height={320}>
+          <BarChart data={chart} margin={{ top: 15, right: 15, left: 10, bottom: 5 }} barSize={32}>
+            <defs>
+              <linearGradient id="colorSector0" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.95} />
+                <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.65} />
+              </linearGradient>
+              <linearGradient id="colorSector1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--chart-2)" stopOpacity={0.95} />
+                <stop offset="100%" stopColor="var(--chart-2)" stopOpacity={0.65} />
+              </linearGradient>
+              <linearGradient id="colorSector2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--chart-3)" stopOpacity={0.95} />
+                <stop offset="100%" stopColor="var(--chart-3)" stopOpacity={0.65} />
+              </linearGradient>
+              <linearGradient id="colorSector3" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--chart-4)" stopOpacity={0.95} />
+                <stop offset="100%" stopColor="var(--chart-4)" stopOpacity={0.65} />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="label" stroke="var(--muted-foreground)" fontSize={11} axisLine={false} tickLine={false} dy={5} />
+            <YAxis stroke="var(--muted-foreground)" fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => v.toLocaleString("pt-BR")} dx={-5} />
+            <Tooltip content={<SectorTooltip />} />
+            <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} iconType="circle" />
             {SECTORS.map((s, i) => (
-              <Bar key={s} dataKey={s} stackId="a" fill={COLORS[i]} radius={i === SECTORS.length - 1 ? [6, 6, 0, 0] : 0} />
+              <Bar key={s} dataKey={s} stackId="a" fill={`url(#colorSector${i})`} radius={i === SECTORS.length - 1 ? [6, 6, 0, 0] : 0} />
             ))}
           </BarChart>
         </ResponsiveContainer>

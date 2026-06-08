@@ -58,7 +58,7 @@ export function KPIs({ filtered, all }: Props) {
     { icon: Hash, label: "Total de Registros", value: fmt(stats.count), accent: "from-chart-2/15 to-chart-2/5", iconColor: "text-chart-2" },
     { icon: Calendar, label: "Média Diária", value: fmt(stats.dailyAvg, 1), accent: "from-chart-3/15 to-chart-3/5", iconColor: "text-chart-3" },
     { icon: BarChart3, label: "Média Mensal", value: fmt(stats.monthlyAvg, 1), accent: "from-chart-4/15 to-chart-4/5", iconColor: "text-chart-4" },
-    { icon: Activity, label: "Material Top", value: stats.topMaterial, sub: `${fmt(stats.topMaterialQty)} und`, accent: "from-chart-5/15 to-chart-5/5", iconColor: "text-chart-5" },
+    { icon: Activity, label: "Material Líder", value: stats.topMaterial, sub: `${fmt(stats.topMaterialQty)} und`, accent: "from-chart-5/15 to-chart-5/5", iconColor: "text-chart-5" },
     { icon: Building2, label: "Setor Líder", value: stats.topSector, sub: `${fmt(stats.topSectorQty)} und`, accent: "from-primary/15 to-primary/5", iconColor: "text-primary" },
     {
       icon: TrendingUp,

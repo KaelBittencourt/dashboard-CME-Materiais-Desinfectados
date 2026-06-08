@@ -27,7 +27,7 @@ export function MultiSelect({ label, options, selected, onChange, placeholder = 
   };
 
   return (
-    <div className="flex flex-col gap-1.5 min-w-[180px]">
+    <div className="flex flex-col gap-1.5 w-full sm:min-w-[180px] sm:w-auto">
       <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
         {label}
       </label>
